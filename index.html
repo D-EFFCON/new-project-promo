@@ -652,7 +652,7 @@
 
   <header>
     <div class="brand">
-      <div class="brand-tag">▸ ARCADE PROMO // 2026</div>
+      <div class="brand-tag">▸ D-EFFCON</div>
       <h1>BLOCK <span>DROP</span></h1>
       <div class="brand-sub">Stack blocks. Clear lines. Earn real discounts on your next project. The higher you score, the more you save.</div>
     </div>
@@ -786,8 +786,7 @@
   </section>
 
   <footer>
-    Built for fun. One discount per project per client.<br>
-    Replace this footer with your studio's contact info before launch.
+    Built By Claude. Promotion is limited to new customers only and for one quoted project.
   </footer>
 </div>
 
@@ -838,9 +837,9 @@ const PIECES = {
 };
 
 const DISCOUNT_TIERS = [
-  { score: 1000, percent: 10, code: 'BLOCK10', id: 'tier-10' },
-  { score: 2500, percent: 20, code: 'BLOCK20', id: 'tier-20' },
-  { score: 5000, percent: 30, code: 'BLOCK30', id: 'tier-30' },
+  { score: 1000, percent: 10, code: 'AU10MATE', id: 'tier-10' },
+  { score: 2500, percent: 20, code: 'TWENTYX', id: 'tier-20' },
+  { score: 5000, percent: 30, code: 'DEFFCON1', id: 'tier-30' },
 ];
 
 let board, current, next, score, level, lines, dropCounter, dropInterval, lastTime;
@@ -930,7 +929,7 @@ function clearLines() {
     const newLevel = Math.floor(lines / 10) + 1;
     if (newLevel > level) {
       level = newLevel;
-      dropInterval = Math.max(80, 1000 - (level - 1) * 80);
+      dropInterval = Math.max(60, 600 - (level - 1) * 45);
     }
     checkTierUnlock();
   }
@@ -1043,9 +1042,9 @@ function showGameOverScreen() {
   document.getElementById('restartBtn').addEventListener('click', startGame);
 }
 
-function drawCell(c, x, y, color, ghost = false) {
+function drawCell(c, x, y, color, ghost = false, offsetY = 0) {
   const px = x * CELL;
-  const py = y * CELL;
+  const py = y * CELL + offsetY;
   if (ghost) {
     c.strokeStyle = color;
     c.lineWidth = 2;
@@ -1112,9 +1111,13 @@ function draw() {
 
   if (current) {
     drawGhost();
+    // Smooth interpolation: piece slides between cells while it can still fall.
+    // When resting on something, snap to grid so it doesn't visually overshoot the lock row.
+    const canDrop = !collides(current, board, 0, 1);
+    const offsetY = canDrop ? Math.min(CELL, (dropCounter / dropInterval) * CELL) : 0;
     current.shape.forEach((row, yy) => {
       row.forEach((v, xx) => {
-        if (v) drawCell(ctx, current.x + xx, current.y + yy, current.color);
+        if (v) drawCell(ctx, current.x + xx, current.y + yy, current.color, false, offsetY);
       });
     });
   }
@@ -1179,7 +1182,7 @@ function startGame() {
   level = 1;
   lines = 0;
   dropCounter = 0;
-  dropInterval = 1000;
+  dropInterval = 600;
   lastTime = 0;
   next = randomPiece();
   spawn();
