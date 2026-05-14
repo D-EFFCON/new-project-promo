@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BLOCK DROP — Play For Your Discount</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-0: #0a0418;
+    --bg-1: #150830;
+    --bg-2: #1d0a45;
+    --grid: rgba(255, 255, 255, 0.04);
+    --grid-strong: rgba(255, 255, 255, 0.08);
+    --neon-pink: #ff2d95;
+    --neon-cyan: #00f0ff;
+    --neon-yellow: #fff056;
+    --neon-purple: #b14aff;
+    --neon-green: #4dff8f;
+    --text: #f5e9ff;
+    --text-dim: #a89bc4;
+    --panel: rgba(255, 255, 255, 0.03);
+    --panel-border: rgba(255, 255, 255, 0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    min-height: 100%;
+    background: var(--bg-0);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    overflow-x: hidden;
+  }
+
+  body {
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 0%, rgba(255, 45, 149, 0.18), transparent 60%),
+      radial-gradient(ellipse 70% 50% at 80% 30%, rgba(0, 240, 255, 0.15), transparent 60%),
+      radial-gradient(ellipse 60% 40% at 50% 100%, rgba(177, 74, 255, 0.20), transparent 60%),
+      linear-gradient(180deg, var(--bg-0), var(--bg-1) 50%, var(--bg-0));
+    background-attachment: fixed;
+    position: relative;
+  }
+
+  /* Scanline overlay for CRT feel */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.15) 0px,
+      rgba(0, 0, 0, 0.15) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    pointer-events: none;
+    z-index: 100;
+    mix-blend-mode: multiply;
+  }
+
+  /* Grain */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='0.9'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.5 0'/></filter><rect width='200' height='200' filter='url(%23n)' opacity='0.4'/></svg>");
+    opacity: 0.08;
+    pointer-events: none;
+    z-index: 99;
+  }
+
+  .container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+  .brand {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .brand-tag {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    color: var(--neon-cyan);
+    letter-spacing: 2px;
+    text-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
+  }
+  .brand h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(40px, 6vw, 72px);
+    font-weight: 800;
+    line-height: 0.9;
+    letter-spacing: -2px;
+    background: linear-gradient(180deg, #fff 0%, #ff2d95 60%, #b14aff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 0 40px rgba(255, 45, 149, 0.4);
+  }
+  .brand h1 span { color: var(--neon-cyan); -webkit-text-fill-color: var(--neon-cyan); text-shadow: 0 0 20px rgba(0, 240, 255, 0.6); }
+  .brand-sub {
+    font-size: 13px;
+    color: var(--text-dim);
+    max-width: 420px;
+    margin-top: 4px;
+  }
+
+  .header-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+  .blink-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: var(--neon-green);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--neon-green);
+    animation: blink 1.2s infinite;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  @keyframes blink { 50% { opacity: 0.3; } }
+
+  /* MAIN LAYOUT */
+  .main {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 24px;
+    align-items: start;
+  }
+  @media (max-width: 880px) {
+    .main { grid-template-columns: 1fr; }
+  }
+
+  .stage {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 4px;
+    padding: 20px;
+    position: relative;
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-items: flex-start;
+    backdrop-filter: blur(6px);
+  }
+  .stage::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 4px;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(255, 45, 149, 0.5), transparent 40%, rgba(0, 240, 255, 0.5));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .canvas-wrap {
+    position: relative;
+  }
+  #board {
+    display: block;
+    background: #060010;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    box-shadow:
+      0 0 0 4px rgba(0, 0, 0, 0.6),
+      0 0 60px rgba(177, 74, 255, 0.25),
+      inset 0 0 40px rgba(0, 0, 0, 0.8);
+    image-rendering: pixelated;
+  }
+  .overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: rgba(6, 0, 16, 0.92);
+    backdrop-filter: blur(4px);
+    z-index: 5;
+    padding: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+  }
+  .overlay.hidden { display: none; }
+  .overlay h2 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 22px;
+    color: var(--neon-pink);
+    text-shadow: 0 0 20px var(--neon-pink);
+    margin-bottom: 16px;
+    letter-spacing: 1px;
+  }
+  .overlay p {
+    color: var(--text-dim);
+    font-size: 13px;
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+  .overlay .final-score {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 28px;
+    color: var(--neon-yellow);
+    text-shadow: 0 0 16px rgba(255, 240, 86, 0.7);
+    margin: 8px 0 16px;
+  }
+  .overlay .achieved {
+    background: linear-gradient(135deg, rgba(77, 255, 143, 0.15), rgba(0, 240, 255, 0.15));
+    border: 1px solid rgba(77, 255, 143, 0.4);
+    padding: 12px 16px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+    font-size: 12px;
+    color: var(--neon-green);
+  }
+  .overlay .achieved strong {
+    display: block;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 18px;
+    color: var(--neon-yellow);
+    margin-top: 4px;
+    text-shadow: 0 0 12px rgba(255, 240, 86, 0.6);
+  }
+
+  /* SIDE INFO */
+  .side {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 180px;
+  }
+  .stat-block {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--panel-border);
+    padding: 12px 14px;
+    border-radius: 2px;
+  }
+  .stat-label {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
+    color: var(--text-dim);
+    letter-spacing: 1.5px;
+    margin-bottom: 6px;
+  }
+  .stat-value {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 20px;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+    letter-spacing: 1px;
+  }
+  .stat-value.pink { color: var(--neon-pink); text-shadow: 0 0 10px rgba(255, 45, 149, 0.6); }
+  .stat-value.yellow { color: var(--neon-yellow); text-shadow: 0 0 10px rgba(255, 240, 86, 0.6); }
+
+  #nextCanvas {
+    display: block;
+    margin: 4px auto 0;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 2px;
+  }
+
+  /* RIGHT COLUMN */
+  .right-col {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .controls-card, .discount-card {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 4px;
+    padding: 20px;
+    backdrop-filter: blur(6px);
+  }
+
+  .card-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    color: var(--neon-pink);
+    letter-spacing: 1.5px;
+    margin-bottom: 14px;
+    text-shadow: 0 0 8px rgba(255, 45, 149, 0.4);
+  }
+
+  .controls-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 12px;
+  }
+  .control-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.06);
+  }
+  .control-row:last-child { border-bottom: none; }
+  .control-row span:first-child { color: var(--text-dim); }
+  kbd {
+    font-family: 'JetBrains Mono', monospace;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-bottom-width: 2px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    color: var(--text);
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .btn {
+    flex: 1;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    padding: 12px 8px;
+    border: 1px solid var(--neon-cyan);
+    background: transparent;
+    color: var(--neon-cyan);
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.15s ease;
+    text-transform: uppercase;
+  }
+  .btn:hover {
+    background: rgba(0, 240, 255, 0.1);
+    box-shadow: 0 0 16px rgba(0, 240, 255, 0.4);
+  }
+  .btn.primary {
+    border-color: var(--neon-pink);
+    color: var(--neon-pink);
+  }
+  .btn.primary:hover {
+    background: rgba(255, 45, 149, 0.12);
+    box-shadow: 0 0 16px rgba(255, 45, 149, 0.5);
+  }
+
+  /* DISCOUNT TABLE */
+  .discount-section {
+    margin-top: 40px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .section-header h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  .section-header h2 em {
+    font-style: italic;
+    color: var(--neon-pink);
+    text-shadow: 0 0 16px rgba(255, 45, 149, 0.5);
+  }
+  .section-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(255, 45, 149, 0.5), transparent);
+  }
+
+  .discount-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  @media (max-width: 720px) {
+    .discount-grid { grid-template-columns: 1fr; }
+  }
+
+  .tier {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
+    border: 1px solid var(--panel-border);
+    padding: 24px;
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+  .tier::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--tier-color);
+    box-shadow: 0 0 16px var(--tier-color);
+  }
+  .tier.bronze { --tier-color: var(--neon-cyan); }
+  .tier.silver { --tier-color: var(--neon-pink); }
+  .tier.gold { --tier-color: var(--neon-yellow); }
+
+  .tier-rank {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+  .tier-discount {
+    font-family: 'Syne', sans-serif;
+    font-size: 64px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -3px;
+    color: var(--tier-color);
+    text-shadow: 0 0 24px var(--tier-color);
+    margin-bottom: 6px;
+  }
+  .tier-discount sup {
+    font-size: 28px;
+    vertical-align: top;
+    margin-left: -4px;
+  }
+  .tier-label {
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 16px;
+  }
+  .tier-threshold {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    padding-top: 12px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .tier-threshold strong {
+    color: var(--tier-color);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 13px;
+  }
+  .tier.unlocked {
+    border-color: var(--tier-color);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+  }
+  .tier.unlocked::after {
+    content: 'UNLOCKED';
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
+    color: var(--neon-green);
+    border: 1px solid var(--neon-green);
+    padding: 4px 8px;
+    border-radius: 2px;
+    letter-spacing: 1px;
+    text-shadow: 0 0 6px var(--neon-green);
+    animation: pulse 1.6s infinite;
+  }
+  @keyframes pulse {
+    50% { opacity: 0.6; transform: scale(0.97); }
+  }
+
+  /* PROGRESS BAR */
+  .progress-section {
+    margin-top: 24px;
+    padding: 16px 20px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--panel-border);
+    border-radius: 4px;
+  }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+  }
+  .progress-label .current {
+    font-family: 'Press Start 2P', monospace;
+    color: var(--neon-yellow);
+    font-size: 11px;
+  }
+  .progress-bar {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink), var(--neon-yellow));
+    width: 0%;
+    transition: width 0.4s ease;
+    box-shadow: 0 0 12px rgba(255, 45, 149, 0.5);
+  }
+  .progress-markers {
+    position: relative;
+    height: 16px;
+    margin-top: 4px;
+  }
+  .marker {
+    position: absolute;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--text-dim);
+    transform: translateX(-50%);
+  }
+
+  /* FOOTER / CLAIM */
+  .claim-section {
+    margin-top: 40px;
+    padding: 32px;
+    background: linear-gradient(135deg, rgba(255, 45, 149, 0.08), rgba(0, 240, 255, 0.05));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    text-align: center;
+  }
+  .claim-section h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .claim-section p {
+    color: var(--text-dim);
+    font-size: 14px;
+    margin-bottom: 20px;
+    max-width: 540px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .claim-section .code-display {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px dashed var(--neon-yellow);
+    padding: 14px 20px;
+    border-radius: 4px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 14px;
+    color: var(--neon-yellow);
+    text-shadow: 0 0 10px rgba(255, 240, 86, 0.4);
+    letter-spacing: 2px;
+  }
+  .claim-section .code-display.locked {
+    border-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-dim);
+    text-shadow: none;
+  }
+
+  footer {
+    margin-top: 60px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.8;
+  }
+  footer a { color: var(--neon-cyan); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  /* Toast for unlock notification */
+  .toast {
+    position: fixed;
+    top: 30px;
+    right: 30px;
+    background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(77, 255, 143, 0.15));
+    border: 1px solid var(--neon-green);
+    padding: 16px 24px;
+    border-radius: 4px;
+    backdrop-filter: blur(8px);
+    z-index: 200;
+    box-shadow: 0 0 40px rgba(77, 255, 143, 0.4);
+    transform: translateX(120%);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    max-width: 320px;
+  }
+  .toast.show { transform: translateX(0); }
+  .toast .toast-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    color: var(--neon-green);
+    margin-bottom: 6px;
+    text-shadow: 0 0 8px var(--neon-green);
+  }
+  .toast .toast-body {
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  /* Mobile controls */
+  .mobile-controls {
+    display: none;
+    margin-top: 16px;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+  }
+  .mobile-controls button {
+    aspect-ratio: 1;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--panel-border);
+    color: var(--text);
+    font-size: 18px;
+    border-radius: 2px;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  .mobile-controls button:active {
+    background: rgba(255, 45, 149, 0.2);
+    border-color: var(--neon-pink);
+  }
+  @media (max-width: 880px) {
+    .mobile-controls { display: grid; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="brand">
+      <div class="brand-tag">▸ ARCADE PROMO // 2026</div>
+      <h1>BLOCK <span>DROP</span></h1>
+      <div class="brand-sub">Stack blocks. Clear lines. Earn real discounts on your next project. The higher you score, the more you save.</div>
+    </div>
+    <div class="header-right">
+      <div><span class="blink-dot"></span>SYSTEM ONLINE</div>
+      <div>v1.0 // © STUDIO</div>
+    </div>
+  </header>
+
+  <div class="main">
+    <!-- GAME STAGE -->
+    <div class="stage">
+      <div class="canvas-wrap">
+        <canvas id="board" width="300" height="600"></canvas>
+        <div id="overlay" class="overlay">
+          <h2>READY?</h2>
+          <p>Use arrow keys or buttons<br>to play. Earn discounts<br>by hitting score targets.</p>
+          <button class="btn primary" id="startBtn">PRESS START</button>
+        </div>
+      </div>
+
+      <aside class="side">
+        <div class="stat-block">
+          <div class="stat-label">SCORE</div>
+          <div class="stat-value pink" id="scoreVal">0</div>
+        </div>
+        <div class="stat-block">
+          <div class="stat-label">LEVEL</div>
+          <div class="stat-value" id="levelVal">1</div>
+        </div>
+        <div class="stat-block">
+          <div class="stat-label">LINES</div>
+          <div class="stat-value yellow" id="linesVal">0</div>
+        </div>
+        <div class="stat-block">
+          <div class="stat-label">NEXT</div>
+          <canvas id="nextCanvas" width="120" height="120"></canvas>
+        </div>
+        <div class="stat-block">
+          <div class="stat-label">HIGH</div>
+          <div class="stat-value" id="highVal" style="font-size: 14px;">0</div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="right-col">
+      <div class="controls-card">
+        <div class="card-title">▸ CONTROLS</div>
+        <div class="controls-list">
+          <div class="control-row"><span>Move</span><span><kbd>◄</kbd> <kbd>►</kbd></span></div>
+          <div class="control-row"><span>Rotate</span><span><kbd>▲</kbd> / <kbd>X</kbd></span></div>
+          <div class="control-row"><span>Soft drop</span><span><kbd>▼</kbd></span></div>
+          <div class="control-row"><span>Hard drop</span><span><kbd>Space</kbd></span></div>
+          <div class="control-row"><span>Pause</span><span><kbd>P</kbd></span></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn" id="pauseBtn">PAUSE</button>
+          <button class="btn primary" id="resetBtn">RESET</button>
+        </div>
+
+        <div class="mobile-controls">
+          <button data-key="ArrowLeft">◄</button>
+          <button data-key="ArrowDown">▼</button>
+          <button data-key="ArrowUp">⟳</button>
+          <button data-key="ArrowRight">►</button>
+          <button data-key="Space">⤓</button>
+        </div>
+      </div>
+
+      <div class="discount-card">
+        <div class="card-title">▸ YOUR PROGRESS</div>
+        <div class="progress-label">
+          <span>Current run</span>
+          <span class="current" id="progressCurrent">0 PTS</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-markers">
+          <span class="marker" style="left: 20%;">1K</span>
+          <span class="marker" style="left: 50%;">2.5K</span>
+          <span class="marker" style="left: 100%;">5K</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DISCOUNT TABLE -->
+  <section class="discount-section">
+    <div class="section-header">
+      <h2>Score. Save. <em>Build.</em></h2>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="discount-grid">
+      <div class="tier bronze" id="tier-10">
+        <div class="tier-rank">▸ TIER 01</div>
+        <div class="tier-discount">10<sup>%</sup></div>
+        <div class="tier-label">off your next project</div>
+        <div class="tier-threshold">
+          <span>Score target</span><strong>1,000</strong>
+        </div>
+      </div>
+
+      <div class="tier silver" id="tier-20">
+        <div class="tier-rank">▸ TIER 02</div>
+        <div class="tier-discount">20<sup>%</sup></div>
+        <div class="tier-label">off your next project</div>
+        <div class="tier-threshold">
+          <span>Score target</span><strong>2,500</strong>
+        </div>
+      </div>
+
+      <div class="tier gold" id="tier-30">
+        <div class="tier-rank">▸ TIER 03</div>
+        <div class="tier-discount">30<sup>%</sup></div>
+        <div class="tier-label">off your next project</div>
+        <div class="tier-threshold">
+          <span>Score target</span><strong>5,000</strong>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CLAIM SECTION -->
+  <section class="claim-section">
+    <h3>How to claim your reward</h3>
+    <p>Reach a tier, screenshot your score, and send it through when you reach out. Your best score sticks — come back any time to push it higher.</p>
+    <div class="code-display locked" id="codeDisplay">▒▒▒▒ NO TIER UNLOCKED ▒▒▒▒</div>
+  </section>
+
+  <footer>
+    Built for fun. One discount per project per client.<br>
+    Replace this footer with your studio's contact info before launch.
+  </footer>
+</div>
+
+<!-- Toast notification -->
+<div class="toast" id="toast">
+  <div class="toast-title">▸ TIER UNLOCKED</div>
+  <div class="toast-body" id="toastBody">10% OFF secured!</div>
+</div>
+
+<script>
+/* ===========================================================
+   BLOCK DROP — Tetris with discount tiers
+   Self-contained, no dependencies, works on GitHub Pages.
+   =========================================================== */
+
+const COLS = 10;
+const ROWS = 20;
+const CELL = 30;
+
+const canvas = document.getElementById('board');
+const ctx = canvas.getContext('2d');
+const nextCanvas = document.getElementById('nextCanvas');
+const nctx = nextCanvas.getContext('2d');
+
+const scoreEl = document.getElementById('scoreVal');
+const levelEl = document.getElementById('levelVal');
+const linesEl = document.getElementById('linesVal');
+const highEl = document.getElementById('highVal');
+const overlay = document.getElementById('overlay');
+const startBtn = document.getElementById('startBtn');
+const pauseBtn = document.getElementById('pauseBtn');
+const resetBtn = document.getElementById('resetBtn');
+const progressFill = document.getElementById('progressFill');
+const progressCurrent = document.getElementById('progressCurrent');
+const codeDisplay = document.getElementById('codeDisplay');
+const toast = document.getElementById('toast');
+const toastBody = document.getElementById('toastBody');
+
+// --- Tetromino shapes (rotation states baked in via matrices) ---
+const PIECES = {
+  I: { color: '#00f0ff', shape: [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]] },
+  O: { color: '#fff056', shape: [[1,1],[1,1]] },
+  T: { color: '#b14aff', shape: [[0,1,0],[1,1,1],[0,0,0]] },
+  S: { color: '#4dff8f', shape: [[0,1,1],[1,1,0],[0,0,0]] },
+  Z: { color: '#ff5470', shape: [[1,1,0],[0,1,1],[0,0,0]] },
+  J: { color: '#5b9dff', shape: [[1,0,0],[1,1,1],[0,0,0]] },
+  L: { color: '#ffa14a', shape: [[0,0,1],[1,1,1],[0,0,0]] },
+};
+
+const DISCOUNT_TIERS = [
+  { score: 1000, percent: 10, code: 'BLOCK10', id: 'tier-10' },
+  { score: 2500, percent: 20, code: 'BLOCK20', id: 'tier-20' },
+  { score: 5000, percent: 30, code: 'BLOCK30', id: 'tier-30' },
+];
+
+let board, current, next, score, level, lines, dropCounter, dropInterval, lastTime;
+let running = false;
+let paused = false;
+let gameOver = false;
+let highScore = parseInt(localStorage.getItem('blockdrop_high') || '0', 10);
+let unlockedTiers = new Set();
+
+highEl.textContent = highScore.toLocaleString();
+updateProgress(0);
+
+function createBoard() {
+  return Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+}
+
+function randomPiece() {
+  const keys = Object.keys(PIECES);
+  const key = keys[Math.floor(Math.random() * keys.length)];
+  const p = PIECES[key];
+  return {
+    type: key,
+    color: p.color,
+    shape: p.shape.map(r => r.slice()),
+    x: Math.floor(COLS / 2) - Math.ceil(p.shape[0].length / 2),
+    y: 0
+  };
+}
+
+function collides(piece, board, dx = 0, dy = 0, shape = piece.shape) {
+  for (let y = 0; y < shape.length; y++) {
+    for (let x = 0; x < shape[y].length; x++) {
+      if (!shape[y][x]) continue;
+      const nx = piece.x + x + dx;
+      const ny = piece.y + y + dy;
+      if (nx < 0 || nx >= COLS || ny >= ROWS) return true;
+      if (ny >= 0 && board[ny][nx]) return true;
+    }
+  }
+  return false;
+}
+
+function merge(piece, board) {
+  piece.shape.forEach((row, y) => {
+    row.forEach((v, x) => {
+      if (v && piece.y + y >= 0) board[piece.y + y][piece.x + x] = piece.color;
+    });
+  });
+}
+
+function rotate(matrix) {
+  const N = matrix.length;
+  const result = Array.from({ length: N }, () => Array(N).fill(0));
+  for (let y = 0; y < N; y++)
+    for (let x = 0; x < N; x++)
+      result[x][N - 1 - y] = matrix[y][x];
+  return result;
+}
+
+function tryRotate() {
+  const rotated = rotate(current.shape);
+  // wall kicks: try original, right, left, up
+  const kicks = [0, 1, -1, 2, -2];
+  for (const k of kicks) {
+    if (!collides(current, board, k, 0, rotated)) {
+      current.shape = rotated;
+      current.x += k;
+      return;
+    }
+  }
+}
+
+function clearLines() {
+  let cleared = 0;
+  outer: for (let y = ROWS - 1; y >= 0; y--) {
+    for (let x = 0; x < COLS; x++) if (!board[y][x]) continue outer;
+    board.splice(y, 1);
+    board.unshift(Array(COLS).fill(0));
+    cleared++;
+    y++; // re-check this row
+  }
+  if (cleared > 0) {
+    const points = [0, 100, 300, 500, 800][cleared] * level;
+    score += points;
+    lines += cleared;
+    // level up every 10 lines
+    const newLevel = Math.floor(lines / 10) + 1;
+    if (newLevel > level) {
+      level = newLevel;
+      dropInterval = Math.max(80, 1000 - (level - 1) * 80);
+    }
+    checkTierUnlock();
+  }
+}
+
+function checkTierUnlock() {
+  DISCOUNT_TIERS.forEach(tier => {
+    if (score >= tier.score && !unlockedTiers.has(tier.id)) {
+      unlockedTiers.add(tier.id);
+      document.getElementById(tier.id).classList.add('unlocked');
+      showToast(`${tier.percent}% OFF unlocked!`);
+      updateCodeDisplay();
+    }
+  });
+}
+
+function updateCodeDisplay() {
+  if (unlockedTiers.size === 0) {
+    codeDisplay.classList.add('locked');
+    codeDisplay.textContent = '▒▒▒▒ NO TIER UNLOCKED ▒▒▒▒';
+    return;
+  }
+  // show highest unlocked
+  let best = null;
+  DISCOUNT_TIERS.forEach(t => { if (unlockedTiers.has(t.id)) best = t; });
+  codeDisplay.classList.remove('locked');
+  codeDisplay.textContent = `CODE: ${best.code}  //  ${best.percent}% OFF`;
+}
+
+function showToast(msg) {
+  toastBody.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+function updateProgress(s) {
+  const max = 5000;
+  const pct = Math.min(100, (s / max) * 100);
+  progressFill.style.width = pct + '%';
+  progressCurrent.textContent = s.toLocaleString() + ' PTS';
+}
+
+function drop(soft = false) {
+  if (!collides(current, board, 0, 1)) {
+    current.y++;
+    if (soft) score += 1;
+  } else {
+    merge(current, board);
+    clearLines();
+    spawn();
+    if (collides(current, board)) endGame();
+  }
+  dropCounter = 0;
+}
+
+function hardDrop() {
+  let dist = 0;
+  while (!collides(current, board, 0, 1)) { current.y++; dist++; }
+  score += dist * 2;
+  merge(current, board);
+  clearLines();
+  spawn();
+  if (collides(current, board)) endGame();
+  dropCounter = 0;
+}
+
+function spawn() {
+  current = next;
+  next = randomPiece();
+  drawNext();
+}
+
+function endGame() {
+  running = false;
+  gameOver = true;
+  if (score > highScore) {
+    highScore = score;
+    localStorage.setItem('blockdrop_high', String(highScore));
+    highEl.textContent = highScore.toLocaleString();
+  }
+  showGameOverScreen();
+}
+
+function showGameOverScreen() {
+  let achievedHtml = '';
+  let best = null;
+  DISCOUNT_TIERS.forEach(t => { if (score >= t.score) best = t; });
+  if (best) {
+    achievedHtml = `
+      <div class="achieved">
+        You unlocked
+        <strong>${best.percent}% OFF</strong>
+        Code: ${best.code}
+      </div>`;
+  } else {
+    const nextTier = DISCOUNT_TIERS.find(t => score < t.score);
+    achievedHtml = `<div class="achieved" style="border-color: rgba(255,255,255,0.15); color: var(--text-dim);">
+      ${(nextTier.score - score).toLocaleString()} more points for ${nextTier.percent}% OFF
+    </div>`;
+  }
+  overlay.innerHTML = `
+    <h2>GAME OVER</h2>
+    <div class="final-score">${score.toLocaleString()}</div>
+    ${achievedHtml}
+    <p>Press start to try again<br>and beat your high score.</p>
+    <button class="btn primary" id="restartBtn">PLAY AGAIN</button>
+  `;
+  overlay.classList.remove('hidden');
+  document.getElementById('restartBtn').addEventListener('click', startGame);
+}
+
+function drawCell(c, x, y, color, ghost = false) {
+  const px = x * CELL;
+  const py = y * CELL;
+  if (ghost) {
+    c.strokeStyle = color;
+    c.lineWidth = 2;
+    c.globalAlpha = 0.35;
+    c.strokeRect(px + 2, py + 2, CELL - 4, CELL - 4);
+    c.globalAlpha = 1;
+    return;
+  }
+  // base
+  c.fillStyle = color;
+  c.fillRect(px, py, CELL, CELL);
+  // inner highlight
+  c.fillStyle = 'rgba(255,255,255,0.25)';
+  c.fillRect(px, py, CELL, 4);
+  c.fillRect(px, py, 4, CELL);
+  // inner shadow
+  c.fillStyle = 'rgba(0,0,0,0.35)';
+  c.fillRect(px, py + CELL - 4, CELL, 4);
+  c.fillRect(px + CELL - 4, py, 4, CELL);
+  // outline
+  c.strokeStyle = 'rgba(0,0,0,0.5)';
+  c.lineWidth = 1;
+  c.strokeRect(px + 0.5, py + 0.5, CELL - 1, CELL - 1);
+}
+
+function drawGrid() {
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x <= COLS; x++) {
+    ctx.beginPath();
+    ctx.moveTo(x * CELL + 0.5, 0);
+    ctx.lineTo(x * CELL + 0.5, ROWS * CELL);
+    ctx.stroke();
+  }
+  for (let y = 0; y <= ROWS; y++) {
+    ctx.beginPath();
+    ctx.moveTo(0, y * CELL + 0.5);
+    ctx.lineTo(COLS * CELL, y * CELL + 0.5);
+    ctx.stroke();
+  }
+}
+
+function drawGhost() {
+  let g = 0;
+  while (!collides(current, board, 0, g + 1)) g++;
+  current.shape.forEach((row, yy) => {
+    row.forEach((v, xx) => {
+      if (v) drawCell(ctx, current.x + xx, current.y + yy + g, current.color, true);
+    });
+  });
+}
+
+function draw() {
+  ctx.fillStyle = '#060010';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  drawGrid();
+
+  // settled blocks
+  board.forEach((row, y) => {
+    row.forEach((color, x) => {
+      if (color) drawCell(ctx, x, y, color);
+    });
+  });
+
+  if (current) {
+    drawGhost();
+    current.shape.forEach((row, yy) => {
+      row.forEach((v, xx) => {
+        if (v) drawCell(ctx, current.x + xx, current.y + yy, current.color);
+      });
+    });
+  }
+}
+
+function drawNext() {
+  nctx.fillStyle = 'rgba(0,0,0,0)';
+  nctx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+  if (!next) return;
+  const size = 22;
+  const shape = next.shape;
+  // trim empty rows/cols for better centering
+  let minX = shape[0].length, maxX = -1, minY = shape.length, maxY = -1;
+  shape.forEach((row, y) => row.forEach((v, x) => {
+    if (v) { if (x < minX) minX = x; if (x > maxX) maxX = x; if (y < minY) minY = y; if (y > maxY) maxY = y; }
+  }));
+  const w = (maxX - minX + 1) * size;
+  const h = (maxY - minY + 1) * size;
+  const ox = (nextCanvas.width - w) / 2;
+  const oy = (nextCanvas.height - h) / 2;
+  for (let y = minY; y <= maxY; y++) {
+    for (let x = minX; x <= maxX; x++) {
+      if (!shape[y][x]) continue;
+      const px = ox + (x - minX) * size;
+      const py = oy + (y - minY) * size;
+      nctx.fillStyle = next.color;
+      nctx.fillRect(px, py, size, size);
+      nctx.fillStyle = 'rgba(255,255,255,0.25)';
+      nctx.fillRect(px, py, size, 3);
+      nctx.fillRect(px, py, 3, size);
+      nctx.fillStyle = 'rgba(0,0,0,0.35)';
+      nctx.fillRect(px, py + size - 3, size, 3);
+      nctx.fillRect(px + size - 3, py, 3, size);
+      nctx.strokeStyle = 'rgba(0,0,0,0.5)';
+      nctx.strokeRect(px + 0.5, py + 0.5, size - 1, size - 1);
+    }
+  }
+}
+
+function updateHud() {
+  scoreEl.textContent = score.toLocaleString();
+  levelEl.textContent = level;
+  linesEl.textContent = lines;
+  updateProgress(score);
+}
+
+function loop(time = 0) {
+  if (!running) return;
+  if (paused) { lastTime = time; requestAnimationFrame(loop); return; }
+  const delta = time - lastTime;
+  lastTime = time;
+  dropCounter += delta;
+  if (dropCounter > dropInterval) drop();
+  draw();
+  updateHud();
+  requestAnimationFrame(loop);
+}
+
+function startGame() {
+  board = createBoard();
+  score = 0;
+  level = 1;
+  lines = 0;
+  dropCounter = 0;
+  dropInterval = 1000;
+  lastTime = 0;
+  next = randomPiece();
+  spawn();
+  unlockedTiers.clear();
+  document.querySelectorAll('.tier').forEach(t => t.classList.remove('unlocked'));
+  updateCodeDisplay();
+  running = true;
+  paused = false;
+  gameOver = false;
+  overlay.classList.add('hidden');
+  updateHud();
+  requestAnimationFrame(loop);
+}
+
+function togglePause() {
+  if (!running || gameOver) return;
+  paused = !paused;
+  pauseBtn.textContent = paused ? 'RESUME' : 'PAUSE';
+  if (paused) {
+    overlay.innerHTML = `<h2>PAUSED</h2><p>Press <kbd>P</kbd> to resume</p>`;
+    overlay.classList.remove('hidden');
+  } else {
+    overlay.classList.add('hidden');
+  }
+}
+
+// --- Input handling ---
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'p' || e.key === 'P') { togglePause(); return; }
+  if (!running || paused || gameOver) return;
+  switch (e.key) {
+    case 'ArrowLeft':
+      if (!collides(current, board, -1, 0)) current.x--;
+      break;
+    case 'ArrowRight':
+      if (!collides(current, board, 1, 0)) current.x++;
+      break;
+    case 'ArrowDown':
+      drop(true);
+      break;
+    case 'ArrowUp':
+    case 'x':
+    case 'X':
+      tryRotate();
+      break;
+    case ' ':
+      hardDrop();
+      e.preventDefault();
+      break;
+  }
+  draw();
+  updateHud();
+});
+
+// prevent space from scrolling
+window.addEventListener('keydown', (e) => {
+  if ([' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) e.preventDefault();
+}, { passive: false });
+
+// Mobile buttons
+document.querySelectorAll('.mobile-controls button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const key = btn.dataset.key === 'Space' ? ' ' : btn.dataset.key;
+    document.dispatchEvent(new KeyboardEvent('keydown', { key }));
+  });
+});
+
+startBtn.addEventListener('click', startGame);
+pauseBtn.addEventListener('click', togglePause);
+resetBtn.addEventListener('click', () => {
+  if (confirm('Reset current run?')) startGame();
+});
+
+// initial draw
+board = createBoard();
+draw();
+</script>
+</body>
+</html>
