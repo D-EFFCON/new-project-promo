@@ -192,6 +192,11 @@
       0 0 60px rgba(177, 74, 255, 0.25),
       inset 0 0 40px rgba(0, 0, 0, 0.8);
     image-rendering: pixelated;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    max-width: 100%;
+    height: auto;
   }
   .overlay {
     position: absolute;
@@ -621,29 +626,111 @@
     color: var(--text);
   }
 
-  /* Mobile controls */
-  .mobile-controls {
+  /* TOUCH ACTION BUTTONS (mobile/tablet) */
+  .touch-actions {
     display: none;
-    margin-top: 16px;
-    grid-template-columns: repeat(5, 1fr);
+    margin-top: 12px;
+    grid-template-columns: 1fr 1.4fr 1fr;
     gap: 8px;
   }
-  .mobile-controls button {
-    aspect-ratio: 1;
+  .touch-btn {
+    height: 64px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
     background: rgba(0, 0, 0, 0.5);
-    border: 1px solid var(--panel-border);
     color: var(--text);
-    font-size: 18px;
-    border-radius: 2px;
+    border: 1px solid var(--panel-border);
+    border-radius: 4px;
     cursor: pointer;
     touch-action: manipulation;
+    letter-spacing: 1.5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    transition: transform 0.08s ease, box-shadow 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
   }
-  .mobile-controls button:active {
-    background: rgba(255, 45, 149, 0.2);
+  .touch-btn .icon { font-size: 18px; line-height: 1; }
+  .touch-btn.rotate {
+    background: rgba(0, 240, 255, 0.08);
+    border-color: rgba(0, 240, 255, 0.5);
+    color: var(--neon-cyan);
+  }
+  .touch-btn.drop {
+    background: rgba(255, 45, 149, 0.12);
     border-color: var(--neon-pink);
+    color: var(--neon-pink);
+    text-shadow: 0 0 6px rgba(255, 45, 149, 0.4);
   }
+  .touch-btn.pause {
+    color: var(--text-dim);
+  }
+  .touch-btn:active {
+    transform: scale(0.94);
+    filter: brightness(1.4);
+  }
+
+  /* Touch hint shown in controls card on touch devices */
+  .touch-hint { display: none; }
+  .touch-hint .hint-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.06);
+    font-size: 12px;
+  }
+  .touch-hint .hint-row:last-child { border-bottom: none; }
+  .touch-hint .hint-row span:first-child { color: var(--text-dim); }
+  .touch-hint .hint-row span:last-child { color: var(--neon-cyan); font-size: 11px; }
+
+  /* MOBILE LAYOUT */
   @media (max-width: 880px) {
-    .mobile-controls { display: grid; }
+    .stage {
+      flex-direction: column-reverse;
+      padding: 14px;
+      gap: 12px;
+    }
+    .canvas-wrap {
+      width: 100%;
+      max-width: 380px;
+      margin: 0 auto;
+    }
+    #board {
+      width: 100%;
+    }
+    .overlay { padding: 16px; }
+    .overlay h2 { font-size: 18px; }
+    .overlay .final-score { font-size: 24px; }
+    .side {
+      flex-direction: row;
+      min-width: 0;
+      width: 100%;
+      gap: 6px;
+    }
+    .stat-block {
+      flex: 1;
+      padding: 8px 4px;
+      text-align: center;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    .stat-label { font-size: 7px; margin-bottom: 4px; }
+    .stat-value { font-size: 13px; line-height: 1.2; }
+    #nextCanvas { width: 44px; height: 44px; }
+    .stat-block.high-stat { display: none; }
+  }
+
+  /* Touch-device overrides — show touch UI, hide keyboard UI */
+  @media (hover: none) and (pointer: coarse) {
+    .touch-actions { display: grid; }
+    .keyboard-hint { display: none; }
+    .touch-hint { display: block; }
   }
 </style>
 </head>
@@ -669,8 +756,13 @@
         <canvas id="board" width="300" height="600"></canvas>
         <div id="overlay" class="overlay">
           <h2>READY?</h2>
-          <p>Use arrow keys or buttons<br>to play. Earn discounts<br>by hitting score targets.</p>
+          <p>Tap to rotate · drag to move<br>Earn discounts by hitting<br>score targets.</p>
           <button class="btn primary" id="startBtn">PRESS START</button>
+        </div>
+        <div class="touch-actions">
+          <button class="touch-btn rotate" data-action="rotate"><span class="icon">⟳</span>ROTATE</button>
+          <button class="touch-btn drop" data-action="harddrop"><span class="icon">⤓</span>DROP</button>
+          <button class="touch-btn pause" data-action="pause"><span class="icon">❚❚</span>PAUSE</button>
         </div>
       </div>
 
@@ -691,7 +783,7 @@
           <div class="stat-label">NEXT</div>
           <canvas id="nextCanvas" width="120" height="120"></canvas>
         </div>
-        <div class="stat-block">
+        <div class="stat-block high-stat">
           <div class="stat-label">HIGH</div>
           <div class="stat-value" id="highVal" style="font-size: 14px;">0</div>
         </div>
@@ -702,24 +794,22 @@
     <div class="right-col">
       <div class="controls-card">
         <div class="card-title">▸ CONTROLS</div>
-        <div class="controls-list">
+        <div class="controls-list keyboard-hint">
           <div class="control-row"><span>Move</span><span><kbd>◄</kbd> <kbd>►</kbd></span></div>
           <div class="control-row"><span>Rotate</span><span><kbd>▲</kbd> / <kbd>X</kbd></span></div>
           <div class="control-row"><span>Soft drop</span><span><kbd>▼</kbd></span></div>
           <div class="control-row"><span>Hard drop</span><span><kbd>Space</kbd></span></div>
           <div class="control-row"><span>Pause</span><span><kbd>P</kbd></span></div>
         </div>
+        <div class="touch-hint">
+          <div class="hint-row"><span>Move piece</span><span>DRAG ◄►</span></div>
+          <div class="hint-row"><span>Rotate</span><span>TAP BOARD</span></div>
+          <div class="hint-row"><span>Soft drop</span><span>SWIPE ▼</span></div>
+          <div class="hint-row"><span>Hard drop</span><span>⤓ BUTTON</span></div>
+        </div>
         <div class="btn-row">
           <button class="btn" id="pauseBtn">PAUSE</button>
           <button class="btn primary" id="resetBtn">RESET</button>
-        </div>
-
-        <div class="mobile-controls">
-          <button data-key="ArrowLeft">◄</button>
-          <button data-key="ArrowDown">▼</button>
-          <button data-key="ArrowUp">⟳</button>
-          <button data-key="ArrowRight">►</button>
-          <button data-key="Space">⤓</button>
         </div>
       </div>
 
@@ -1202,7 +1292,12 @@ function togglePause() {
   paused = !paused;
   pauseBtn.textContent = paused ? 'RESUME' : 'PAUSE';
   if (paused) {
-    overlay.innerHTML = `<h2>PAUSED</h2><p>Press <kbd>P</kbd> to resume</p>`;
+    overlay.innerHTML = `
+      <h2>PAUSED</h2>
+      <p>Press <kbd>P</kbd> or tap below to resume</p>
+      <button class="btn primary" id="resumeBtn">RESUME</button>
+    `;
+    document.getElementById('resumeBtn').addEventListener('click', togglePause);
     overlay.classList.remove('hidden');
   } else {
     overlay.classList.add('hidden');
@@ -1242,11 +1337,79 @@ window.addEventListener('keydown', (e) => {
   if ([' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) e.preventDefault();
 }, { passive: false });
 
-// Mobile buttons
-document.querySelectorAll('.mobile-controls button').forEach(btn => {
+// --- Touch / mobile input ---
+// Hybrid scheme: canvas accepts drag-to-move, tap-to-rotate, swipe-down for soft drop.
+// Big buttons handle Hard Drop, Rotate (backup), Pause.
+
+let touchState = null;
+
+canvas.addEventListener('touchstart', (e) => {
+  if (!running || paused || gameOver) return;
+  e.preventDefault();
+  const t = e.touches[0];
+  const rect = canvas.getBoundingClientRect();
+  touchState = {
+    startX: t.clientX,
+    startY: t.clientY,
+    lastDropY: t.clientY,
+    startPieceX: current.x,
+    startTime: performance.now(),
+    cellW: rect.width / COLS,
+    cellH: rect.height / ROWS,
+    moved: false,
+  };
+}, { passive: false });
+
+canvas.addEventListener('touchmove', (e) => {
+  if (!touchState || !running || paused || gameOver) return;
+  e.preventDefault();
+  const t = e.touches[0];
+  const dx = t.clientX - touchState.startX;
+  const dy = t.clientY - touchState.startY;
+
+  if (Math.abs(dx) > 6 || Math.abs(dy) > 6) touchState.moved = true;
+
+  // Drag-to-position: piece column = start column + (drag distance / cellW)
+  const cellsDelta = Math.round(dx / touchState.cellW);
+  const targetX = touchState.startPieceX + cellsDelta;
+  while (current.x < targetX && !collides(current, board, 1, 0)) current.x++;
+  while (current.x > targetX && !collides(current, board, -1, 0)) current.x--;
+
+  // Soft drop: each ~0.7 cells of downward finger motion triggers one drop step
+  while (t.clientY - touchState.lastDropY > touchState.cellH * 0.7) {
+    drop(true);
+    touchState.lastDropY += touchState.cellH * 0.7;
+  }
+
+  draw();
+  updateHud();
+}, { passive: false });
+
+canvas.addEventListener('touchend', (e) => {
+  if (!touchState) return;
+  e.preventDefault();
+  const duration = performance.now() - touchState.startTime;
+  // Tap (no significant movement, short duration) = rotate
+  if (!touchState.moved && duration < 300 && running && !paused && !gameOver) {
+    tryRotate();
+    draw();
+    updateHud();
+  }
+  touchState = null;
+}, { passive: false });
+
+canvas.addEventListener('touchcancel', () => { touchState = null; });
+
+// Big touch buttons (Rotate / Hard Drop / Pause)
+document.querySelectorAll('.touch-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    const key = btn.dataset.key === 'Space' ? ' ' : btn.dataset.key;
-    document.dispatchEvent(new KeyboardEvent('keydown', { key }));
+    const action = btn.dataset.action;
+    if (action === 'pause') { togglePause(); return; }
+    if (!running || paused || gameOver) return;
+    if (action === 'rotate') tryRotate();
+    else if (action === 'harddrop') hardDrop();
+    draw();
+    updateHud();
   });
 });
 
